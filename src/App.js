@@ -389,10 +389,9 @@ const
                 setAnswers(Array(10).fill(""));
             },
             startTest = () => {
-                const input = firstField.current;
-                setTimeout(() => {
-                    input.focus();
-                }, 0);
+                //const input = firstField.current;
+                //setTimeout(input.focus, 0);
+                setAnswers(Array(10).fill(""));
                 setTest(true);
                 setReveal(false);
             },
@@ -495,7 +494,7 @@ const
                 disableBackdropClick={challengeID !== ""}
                 disableEscapeKeyDown={challengeID !== ""}
             >
-            <Waiting users={props.users} open={Boolean(challengeID !== "" &&( timer === null || (timer && timer < 0)))} onClose={() => { console.log(ownerID, props.socketID);
+            <Waiting users={props.users} open={Boolean(challengeID !== "" &&( timer === null || (timer && timer < 0)))} onClose={() => {
              if(ownerID === props.socketID) {cancelChallenge();setChallengeID("");setTimer(null)} else {leaveChallenge();}}} members={members} setTimer={setTimer} timer={timer} challengeID={challengeID} startChallenge={startChallenge} owner={ownerID === props.socketID} ownerID={ownerID} />
             <Results winners={winners} open={challengeID !== "" && winners.length > 0} onClose={() => {setChallengeID("");setTimer(null)}} socketID={props.socketID} users={props.users} results={results} />
                 <DialogContent>
@@ -510,24 +509,7 @@ const
                             <TableRow>
                                 <TableCell colSpan="2">Singular</TableCell>
                             </TableRow>
-                            {words[props.group] !== undefined && words[props.group].map((word, i) => {
-                                let refProp = {};
-                                if (i === 0 && words[props.group][0].split("-")[1] !== undefined) {
-                                    refProp = {
-                                        ref: firstField,
-                                    };
-                                }
-                                if (i === 1 && words[props.group][0].split("-")[1] === undefined) {
-                                    refProp = {
-                                        ref: firstField,
-                                    };
-                                }
-                                if (i === 2 && words[props.group][0].split("-")[1] === undefined && words[props.group][1].split("-")[1] === undefined) {
-                                    refProp = {
-                                        ref: firstField,
-                                    };
-                                }
-                                return (
+                            {words[props.group] !== undefined && words[props.group].map((word, i) => (
                                     <Fragment key={i}>
                                         {i === 5 &&
                                             <TableRow>
@@ -543,8 +525,9 @@ const
                                                         <TextField
                                                             disabled={!test}
                                                             onKeyDown={preventEnter(i)}
-                                                            {...refProp}
-                                                            onInput={handleInput(i)}
+                                                            inputRef={i === 0 ? firstField : undefined}
+                                                            //{...refProp}
+                                                            onChange={handleInput(i)}
                                                             value={test || reveal ? answers[i] : word.split("-")[1]}
                                                             className="caseField"
                                                             margin="none"
@@ -557,8 +540,7 @@ const
                                             </TableCell>
                                         </TableRow>
                                     </Fragment>
-                                )
-                            })}
+                                ))}
                         </TableBody>
                     </Table>
                     {timer !== null && "Your time: " + (Math.abs(timer) / 1000).toFixed(timer < 0 ? 0 : 1)} <br />
@@ -703,8 +685,6 @@ const
                 socket.emit("cancel challenge", challengeID, localStorage.getItem("school").toLowerCase());
                 setTest(false);
                 setChallengeID("");
-                console.log('hello');
-                
               },
             close = () => {
                 setAnswers(Array(18).fill(""));
@@ -713,8 +693,9 @@ const
                 props.close();
             },
             handleInput = i => e => {
-                setAnswers(answers.map((answer, j) => j === i ? e.target.innerHTML : answer));
-                if (e.key === "Enter" && i === 9) {
+                //console.log(i, answers);
+                setAnswers(answers.map((answer, j) => j === i ? e.target.value : answer));
+                if (e.key === "Enter" && i === answers.length - 1) {
                     check();
                 }
             },
@@ -742,17 +723,14 @@ const
             },
             preventEnter = i => e => {
                 if (e.key === "Enter") {
-                    e.preventDefault();
                     if (i === 17 || (props.group.includes("subjunctive") && i === 11)) {
                         check();
                     }
                 }
             },
             startTest = () => {
-                const input = firstField.current;
-                setTimeout(() => {
-                    input.focus();
-                }, 0);
+                //setTimeout(firstField.current.focus, 0);
+                setAnswers(Array(18).fill(""));
                 setTest(true);
                 setReveal(false);
             },
@@ -778,8 +756,6 @@ const
               }
             },
             leaveChallenge = () => {
-                console.log('leave');
-                
               socket.emit("leave challenge", challengeID);
               setChallengeID("");
               setTimer(null);
@@ -820,8 +796,6 @@ const
                   });
             
                 socket.on("challenge left", id => {
-                    console.log(id);
-                    
                     setMembers(globalMembers.filter(m => m !== id));
                   });
                   /*socket.on("challenge cancelled", id =>
@@ -848,7 +822,7 @@ const
                 disableBackdropClick={challengeID !== ""}
                 disableEscapeKeyDown={challengeID !== ""}
             >
-                <Waiting users={props.users} open={Boolean(challengeID !== "" &&( timer === null || (timer && timer < 0)))} onClose={() => { console.log(ownerID, props.socketID);
+                <Waiting users={props.users} open={Boolean(challengeID !== "" &&( timer === null || (timer && timer < 0)))} onClose={() => {
                  if(ownerID === props.socketID) {cancelChallenge();setChallengeID("");setTimer(null)} else {leaveChallenge();}}} members={members} setTimer={setTimer} timer={timer} challengeID={challengeID} startChallenge={startChallenge} owner={ownerID === props.socketID} ownerID={ownerID} />
                 <Results winners={winners} open={challengeID !== "" && winners.length > 0} onClose={() => {setChallengeID("");setTimer(null)}} socketID={props.socketID} users={props.users} results={results} />
     <DialogTitle>Verbs: {props.group}</DialogTitle>
@@ -879,24 +853,7 @@ const
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {verbs[props.type][props.group] !== undefined && maps.map((word, i) => {
-                                let refProp = {};
-                                if (i === 0 && maps[0].split("-")[1] !== undefined) {
-                                    refProp = {
-                                        ref: firstField,
-                                    };
-                                }
-                                if (i === 1 && maps[0].split("-")[1] === undefined) {
-                                    refProp = {
-                                        ref: firstField,
-                                    };
-                                }
-                                if (i === 2 && maps[0].split("-")[1] === undefined && maps[1].split("-")[1] === undefined) {
-                                    refProp = {
-                                        ref: firstField,
-                                    };
-                                }
-                                return (
+                            {verbs[props.type][props.group] !== undefined && maps.map((word, i) => (
                                     <Fragment key={i}>
                                         <TableRow>
                                             <TableCell>{otherForms ? forms[i] : persons[i]}</TableCell>
@@ -907,8 +864,9 @@ const
                                                         <TextField
                                                             disabled={!test}
                                                             onKeyDown={preventEnter(i)}
-                                                            {...refProp}
-                                                            onInput={handleInput(i)}
+                                                            inputRef={i === 0 ? firstField : undefined}
+                                                            //{...refProp}
+                                                            onChange={handleInput(i)}
                                                             value={(test || reveal || challengeID !== "") ? answers[i] : word.split("-")[1]}
                                                             className={otherForms ? "otherField" : "verbField"}
                                                             margin="none"
@@ -926,8 +884,8 @@ const
                                                             <TextField
                                                                 disabled={!test}
                                                                 onKeyDown={preventEnter(i + 6)}
-                                                                onInput={handleInput(i + 6)}
-                                                                value={(test || reveal || challengeID !== "") ? answers[i] : verbs[props.type][props.group][i + 6].split("-")[1]}
+                                                                onChange={handleInput(i + 6)}
+                                                                value={(test || reveal || challengeID !== "") ? answers[i + 6] : verbs[props.type][props.group][i + 6].split("-")[1]}
                                                                 className="verbField"
                                                                 margin="none"
                                                             />
@@ -944,8 +902,8 @@ const
                                                         <TextField
                                                             disabled={!test}
                                                             onKeyDown={preventEnter(i + 12)}
-                                                            onInput={handleInput(i + 12)}
-                                                            value={(test || reveal || challengeID !== "") ? answers[i] : verbs[props.type][props.group][i + 12].split("-")[1]}
+                                                            onChange={handleInput(i + 12)}
+                                                            value={(test || reveal || challengeID !== "") ? answers[i + 12] : verbs[props.type][props.group][i + 12].split("-")[1]}
                                                             className={"verbField"}
                                                             margin="none"
                                                         />
@@ -956,8 +914,7 @@ const
                                             </TableCell>}
                                         </TableRow>
                                     </Fragment>
-                                )
-                            })}
+                                ))}
                         </TableBody>
                     </Table>
                     {timer !== null && "Your time: " + (Math.abs(timer) / 1000).toFixed(timer < 0 ? 0 : 1)} <br />
@@ -1103,22 +1060,24 @@ export default () => {
                 }
             }
         }, []);
-
+        function socketJoin(u) {
+            socket.emit(
+                "join",
+                u || localStorage.getItem("username"),
+                localStorage.getItem("school").toLowerCase(),
+                (u, c, i) => {
+                  let newUsers = {};
+                  u.forEach(x => {
+                    newUsers[x.id] = x.username;
+                  });
+                  setUsers(newUsers);
+                  setChallenges(c);
+                  setSocketID(i);
+                }
+              );
+        }
   useEffect(() => {
-    socket.emit(
-      "join",
-      localStorage.getItem("username"),
-      localStorage.getItem("school").toLowerCase(),
-      (u, c, i) => {
-        let newUsers = {};
-        u.forEach(x => {
-          newUsers[x.id] = x.username;
-        });
-        setUsers(newUsers);
-        setChallenges(c);
-        setSocketID(i);
-      }
-    );
+    socketJoin();
     socket.on("challenge created", obj => {
       setChallenges([...globalChallenges, obj]);
       globalChallengeID === "" && setOpen(obj.ownerID);
@@ -1134,37 +1093,25 @@ export default () => {
     socket.on("user left", id => {
         let newUsers = globalUsers;
       delete newUsers[id];
-      console.log(globalUsers);
       setUsers(omit(globalUsers, id));
     });
     socket.on("disconnect", () => {
-        window.location.reload();
-        sessionStorage.connect = false;
-    })
+        console.log("disconnect");
+        //window.location.reload();
+        //sessionStorage.connect = "false";
+        socket.connect();
+    });
     socket.on("connect", () => {
-        if (sessionStorage.connect === "false") {
-        socket.emit(
-            "join",
-            localStorage.getItem("username"),
-            localStorage.getItem("school").toLowerCase(),
-            (u, c, i) => {
-              let newUsers = {};
-              u.forEach(x => {
-                newUsers[x.id] = x.username;
-              });
-              setUsers(newUsers);
-              setChallenges(c);
-              setSocketID(i);
-            }
-          );
-        }
-        sessionStorage.connect = true
+        //console.log("connected");
+    //  if (sessionStorage.connect === "false") {
+            //console.log("hi");
+           socketJoin();
+        //}
+        //sessionStorage.connect = "true"
       })
   }, []);
   useEffect(() => {
     globalUsers = users;
-    console.log(users);
-    
   }, [users]);
   useEffect(() => {
     globalChallenges = challenges;
@@ -1181,24 +1128,9 @@ export default () => {
     return;
   };
   const tabs = ["Nouns", "Adjectives","Pronouns", "Numbers", "Participles", "Actives", "Passives", "verbs other forms", "Memes", "Live", "Settings"];
-  console.log(name, school);
-  
     return (
         <ThemeProvider theme={theme}>
-            {localStorage.getItem("used") !== "yes" && <Firsttime set={(u, s) => {setName(u); setSchool(s);socket.emit(
-      "join",
-      u,
-      s.toLowerCase(),
-      (u, c, i) => {
-        let newUsers = {};
-        u.forEach(x => {
-          newUsers[x.id] = x.username;
-        });
-        setUsers(newUsers);
-        setChallenges(c);
-        setSocketID(i);
-      }
-    );}} />}
+            {localStorage.getItem("used") !== "yes" && <Firsttime set={(us, s) => {setName(us); setSchool(s);socketJoin(us);}} />}
             
             <Dialog
                 open={resetOpen}
